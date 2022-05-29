@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="delivery_cube_executor" />
+        <module name="delivery_cube" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="delivery_cube" target="11" />
+      <module name="delivery_cube_client" target="11" />
+      <module name="delivery_cube_executor" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="delivery_cube" options="-parameters" />
+      <module name="delivery_cube_client" options="-parameters" />
+      <module name="delivery_cube_executor" options="-parameters" />
+    </option>
+  </component>
+</project>
