@@ -18,50 +18,20 @@ public class CallbackQueryHandler {
     private ListAdCallback listAdCallback;
 
     @Autowired
-    private AddAdCallback addAdCallback;
+    private NextCallback nextCallback;
 
-    @Autowired
-    private CreateAdCallback createAdCallback;
 
-    @Autowired
-    private AdNameCallback adNameCallback;
-
-    @Autowired
-    private AdDescriptionCallback adDescriptionCallback;
-
-    @Autowired
-    private AdCostCallback adCostCallback;
-
-    @Autowired
-    private AdFileCallback adFileCallback;
 
     @SneakyThrows
     public void catchCallback(TelegramBot bot, Update update) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         bot.execute(AnswerCallbackQuery.builder().callbackQueryId(callbackQuery.getId()).build());
         switch (callbackQuery.getData()) {
-            case "/createAd":
-                createAdCallback.run(bot, update);
-                break;
             case "/listAd":
                 listAdCallback.run(bot, callbackQuery);
                 break;
-            case "/adName":
-                adNameCallback.run(bot, callbackQuery);
-                break;
-            case "/adDescription":
-                adDescriptionCallback.run(bot, callbackQuery);
-                break;
-            case "/adCost":
-                adCostCallback.run(bot, callbackQuery);
-                break;
-            case "/adFile":
-                adFileCallback.run(bot, callbackQuery);
-                break;
-            case "/addAd":
-                addAdCallback.run(bot, callbackQuery);
-                break;
-            case "/backToMenu":
+            case "/next":
+                nextCallback.run(bot, callbackQuery);
                 break;
         }
         ;

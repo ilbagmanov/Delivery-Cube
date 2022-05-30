@@ -3,13 +3,12 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/delivery_cube/pom.xml" />
-        <option value="$PROJECT_DIR$/delivery_cube_executor/pom.xml" />
         <option value="$PROJECT_DIR$/delivery_cube_client/pom.xml" />
+        <option value="$PROJECT_DIR$/delivery_cube_executor/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="13" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" project-jdk-name="13" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

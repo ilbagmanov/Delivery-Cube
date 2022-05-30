@@ -4,7 +4,10 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -56,6 +59,17 @@ public class ExecuteHandler {
                 accountService.updateAccountById(account.getId(), 0);
                 sendAdMessage(bot, message, request);
                 break;
+            case 4:
+                request = requestService.getLastRequestByAccountId(account.getId());
+                GetFile getFile = new GetFile(message.getDocument().getFileId());
+                String filePath = bot.execute(getFile).getFilePath();
+                File myFile = new File("downloads/" + getFile.getFileId());
+                File file = bot.downloadFile(filePath, myFile);
+                request.setFile(file);
+                requestService.save(request);
+                accountService.updateAccountById(account.getId(), 0);
+                sendAdMessage(bot, message, request);
+                break;
             default:
                 bot.execute(SendMessage.builder()
                         .chatId(message.getChatId().toString())
@@ -69,6 +83,18 @@ public class ExecuteHandler {
 
     @SneakyThrows
     private void sendAdMessage(TelegramBot bot, Message message, Request request) {
+        if (request.getFile() != null) {
+
+            bot.execute(SendPhoto.builder()
+                    .chatId(message.getChatId().toString())
+                    .photo(new InputFile(request.getFile(), "photo.png"))
+                    .caption(getAdMessage(request))
+                    .parseMode("html")
+                    .replyMarkup(new InlineKeyboardMarkup(getKeyboard()))
+                    .build());
+            return;
+        }
+
         bot.execute(SendMessage.builder()
                 .chatId(message.getChatId().toString())
                 .text(getAdMessage(request))
@@ -81,7 +107,7 @@ public class ExecuteHandler {
     private String getAdMessage(Request request) {
         File file = ResourceUtils.getFile("classpath:templates/CreateAd.html");
         String ans = new String(Files.readAllBytes(file.toPath()));
-        return String.format(ans, request.getId(), request.getName(), request.getDescription(), request.getCost(), "🚫");
+        return String.format(ans, request.getId(), request.getName(), request.getDescription(), request.getCost(), request.getFile() != null ? "✅" : "🚫");
     }
 
     private List<List<InlineKeyboardButton>> getKeyboard() {
@@ -105,6 +131,10 @@ public class ExecuteHandler {
                 .callbackData("/adFile")
                 .text("Edit file")
                 .build());
+        keyboard.add(row1);
+        row1 = new LinkedList<>();
+        row1.add(InlineKeyboardButton.builder()
+                .callbackData("/addAd").text("FINISH").build());
         keyboard.add(row1);
         row1 = new LinkedList<>();
         row1.add(InlineKeyboardButton.builder()

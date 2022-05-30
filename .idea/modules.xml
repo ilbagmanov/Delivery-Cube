@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DeliveryCube.iml" filepath="$PROJECT_DIR$/DeliveryCube.iml" />
       <module fileurl="file://$PROJECT_DIR$/delivery_cube_client/delivery_cube.iml" filepath="$PROJECT_DIR$/delivery_cube_client/delivery_cube.iml" />
       <module fileurl="file://$PROJECT_DIR$/delivery_cube_executor/delivery_cube_executor.iml" filepath="$PROJECT_DIR$/delivery_cube_executor/delivery_cube_executor.iml" />
     </modules>

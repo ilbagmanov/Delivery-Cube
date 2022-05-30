@@ -6,24 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.File;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Request {
+public class AccountsRequests {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long Id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Account authorId;
+    @ManyToOne
+    private Account account;
 
-    private String name;
-    private String description;
-    private Double cost;
-    private File file;
+    @ManyToOne
+    private Request request;
 }

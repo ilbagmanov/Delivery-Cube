@@ -1,18 +1,18 @@
-package ru.itis.delivery_cube.handler.callback;
+package ru.itis.delivery_cube.handler.message;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.itis.delivery_cube.TelegramBot;
+import ru.itis.delivery_cube.model.Account;
 import ru.itis.delivery_cube.model.Request;
 import ru.itis.delivery_cube.service.AccountService;
 import ru.itis.delivery_cube.service.RequestService;
@@ -24,24 +24,59 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateAdCallback {
+public class ExecuteHandler {
 
     @Autowired
     private AccountService accountService;
 
-    @Autowired
-    private RequestService requestService;
 
     @SneakyThrows
-    public void run(TelegramBot bot, Update update) {
+    public void run(TelegramBot bot, Message message) {
+        Account account = accountService.getAccountById(message.getFrom().getId());
+        Request request;
+        Integer status = account.getStatus();
+        switch (status) {
+            default:
+                bot.execute(SendMessage.builder()
+                        .chatId(message.getChatId().toString())
+                        .text("ERROR")
+                        .build());
+                break;
+        }
+
+
+    }
+
+    @SneakyThrows
+    private void sendAdMessage(TelegramBot bot, Message message, Request request) {
+        if (request.getFile() != null) {
+
+            bot.execute(SendPhoto.builder()
+                    .chatId(message.getChatId().toString())
+                    .photo(new InputFile(request.getFile(), "photo.png"))
+                    .caption(getAdMessage(request))
+                    .parseMode("html")
+                    .replyMarkup(new InlineKeyboardMarkup(getKeyboard()))
+                    .build());
+            return;
+        }
+
+        bot.execute(SendMessage.builder()
+                .chatId(message.getChatId().toString())
+                .text(getAdMessage(request))
+                .parseMode("html")
+                .replyMarkup(new InlineKeyboardMarkup(getKeyboard()))
+                .build());
+    }
+
+    @SneakyThrows
+    private String getAdMessage(Request request) {
         File file = ResourceUtils.getFile("classpath:templates/CreateAd.html");
         String ans = new String(Files.readAllBytes(file.toPath()));
-        Long id = requestService.save(Request.builder().authorId(accountService.getAccountById(update.getCallbackQuery().getFrom().getId())).build());
-        ans = String.format(ans, id, "🚫", "🚫", "🚫", "🚫");
+        return String.format(ans, request.getId(), request.getName(), request.getDescription(), request.getCost(), request.getFile() != null ? "✅" : "🚫");
+    }
 
+    private List<List<InlineKeyboardButton>> getKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> row1 = new LinkedList<>();
         row1.add(InlineKeyboardButton.builder()
@@ -73,17 +108,6 @@ public class CreateAdCallback {
                 .text("« Назад")
                 .build());
         keyboard.add(row1);
-
-        bot.execute(EditMessageText.builder()
-                .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
-                .messageId(update.getCallbackQuery().getMessage().getMessageId())
-                .parseMode("html")
-                .text(ans)
-                .build());
-        bot.execute(EditMessageReplyMarkup.builder()
-                .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
-                .messageId(update.getCallbackQuery().getMessage().getMessageId())
-                .replyMarkup(new InlineKeyboardMarkup(keyboard))
-                .build());
+        return keyboard;
     }
 }
